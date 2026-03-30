@@ -1,0 +1,79 @@
+离线模式
+当前 Claude CLI 未连接，使用离线模式。
+
+注意: 离线模式下无法获取实时数据。
+
+请检查：
+
+WebSocket Bridge Server 是否运行 (npm run ws:server)
+
+Claude CLI Connector 是否运行 (npm run ws:claude)
+您的查询：
+查询目前监控了多少网络设备根据 Zabbix 监控系统查询结果，目前监控的网络设备情况如下：
+
+监控概况
+总计监控主机：5 台
+
+网络设备（SNMP）：4 台
+
+Zabbix 服务器：1 台
+网络设备详情
+| 设备名称 | IP 地址 | 状态 | 接口类型 |
+|---------|--------|------|---------|
+| test | 192.168.56.11 | ✅ 在线 | SNMP |
+| zhihu-192.168.56.10 | 192.168.56.10 | ✅ 在线 | SNMP |
+| test-snmp-host-01 | 192.168.56.18 | ✅ 在线 | SNMP |
+
+状态说明
+在线设备：3 台（网络设备全部在线）
+
+不可用设备：1 台（hostid: 10435，可能已离线或配置异常）
+
+Zabbix 服务器：1 台（运行正常）
+> 💡 总结：目前通过 SNMP 协议监控的网络设备共 3 台在线运行，1 台处于不可用状态，需要关注不可用设备的离线原因。
+
+[AI Connector] Config updated: model=kimi-k2.5, url=https://ark.cn-beijing.volces.com/api/coding
+[AI Connector] Received query: "查询目前监控了多少网络设备"
+[AI Connector] Starting AI execution...
+[AI Connector] Calling LLM: kimi-k2.5
+[AI Connector] AI requested 1 tool calls
+[AI Connector] Executing tool: query_zabbix {
+  method: 'host.get',
+  params: {
+    output: [ 'hostid', 'host', 'name', 'status' ],
+    selectInterfaces: [ 'type', 'ip', 'dns' ],
+    selectGroups: [ 'name' ],
+    limit: 1000
+  }
+}
+[AI Connector] Zabbix host.get 返回: 4 条记录
+[AI Connector] query_zabbix 返回: {"jsonrpc":"2.0","result":[{"hostid":"10084","host":"Zabbix server","name":"Zabbix server","status":"0","groups":[{"name":"Zabbix servers"}],"interfaces":[{"type":"1","ip":"172.2.5.219","dns":""}]},{"hostid":"10890","host":"test","name":"test","status":"0","groups":[{"name":"common-group"}],"interfaces":[{"type":"2","ip":"192.168.56.11","dns":""}]},{"hostid":"10932","host":"zhihu-192.168.56.10","name":"zhihu-192.168.56.10","status":"0","groups":[{"name":"common-group"}],"interfaces":[{"type":"2"...
+[AI Connector] Calling LLM (stream): kimi-k2.5
+[AI Connector] Stream complete: 503 chars
+[AI Connector] AI 回复内容: 根据 Zabbix 监控系统查询结果，目前监控的网络设备情况如下：
+
+## 监控概况
+
+**总计监控主机：5 台**
+- 网络设备（SNMP）：4 台
+- Zabbix 服务器：1 台
+
+---
+
+## 网络设备详情
+
+| 设备名称 | IP 地址 | 状态 | 接口类型 |
+|---------|--------|------|---------|
+| test | 192.168.56.11 | ✅ 在线 | SNMP |
+| zhihu-192.168.56.10 | 192.168.56.10 | ✅ 在线 | SNMP |
+| test-snmp-host-01 | 192.168.56.18 | ✅ 在线 | SNMP |
+
+---
+
+## 状态说明
+
+- **在线设备**：3 台（网络设备全部在线）
+- **不可用设备**：1 台（hostid: 10435，可能已离线或配置异常）
+- **Zabbix 服务器**：1 台（运行正常）
+
+> 💡 **总结**：目前通过 SNMP 协议监控的网络设备共 **3 台在线运行**，1 台处于不可用状态，需要关注不可用设备的离线原因。

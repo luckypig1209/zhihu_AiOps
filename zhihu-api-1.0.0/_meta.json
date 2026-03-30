@@ -1,0 +1,5 @@
+{
+  "name": "zhihu-api",
+  "version": "1.0.0",
+  "description": "智护运维平台 API 集成工具。提供展示中心、资产中心、监控中心等模块的完整 API 调用能力，集成 Zabbix 和 VictoriaMetrics 数据源。"
+}

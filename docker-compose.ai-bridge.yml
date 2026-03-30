@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # AI Bridge 服务
+  # ============================================
+  ai-bridge:
+    build:
+      context: ./zh-web-code/websocket-bridge
+      dockerfile: Dockerfile
+    container_name: zhihu-ai-bridge
+    restart: unless-stopped
+    ports:
+      - "9999:9999"  # macOS Docker Desktop 需要端口映射
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+    extra_hosts:
+      - "api.deepseek.com:218.92.141.107"  # 绕过 DNS 解析
+    environment:
+      # WebSocket 配置
+      - WS_PORT=9999
+      # LLM API 配置
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.deepseek.com/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-deepseek-chat}
+      # 外部服务地址
+      - VM_URL=${VM_URL:-http://117.89.88.210:29090}
+      - ZABBIX_URL=${ZABBIX_URL:-http://117.89.88.210:28080}
+      - ZHIHU_API_URL=${ZHIHU_API_URL:-http://117.89.88.210:58080/admin-api}
+      - ZABBIX_USER=${ZABBIX_USER:-Admin}
+      - ZABBIX_PASSWORD=${ZABBIX_PASSWORD}
+    volumes:
+      # 挂载日志目录
+      - ./logs/ai-bridge:/app/logs
+      # 挂载源码目录（开发调试，可热更新代码）
+      - ./zh-web-code/websocket-bridge/server.js:/app/server.js
+      - ./zh-web-code/websocket-bridge/ai-connector.js:/app/ai-connector.js
+      # 挂载 references 目录（Skills 文档）
+      - ./zhihu-api-1.0.0/references:/app/skills:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('ws').createConnection('ws://localhost:9999').on('error',()=>process.exit(1)).on('open',()=>process.exit(0))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
