@@ -1,0 +1,6 @@
+@font-face {
+  /*给字体命名*/
+  font-family: 'YouSheBiaoTiHei';
+  /*引入字体文件，具体路径由自己的实际情况而定*/
+  src: url('./YouSheBiaoTiHei.ttf');
+}

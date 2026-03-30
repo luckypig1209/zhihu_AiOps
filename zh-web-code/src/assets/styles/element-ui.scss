@@ -1,0 +1,172 @@
+// cover some element-ui styles
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+  font-weight: 400 !important;
+}
+
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+  .el-button.is-disabled, .el-button.is-disabled:hover, .el-button.is-disabled:focus{
+    background:#a1c0f9 !important;
+    border-color:#a1c0f9 !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+.cell {
+  .el-tag {
+    margin-right: 0px;
+  }
+}
+
+.small-padding {
+  .cell {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.fixed-width {
+  .el-button--mini {
+    padding: 7px 10px;
+    width: 60px;
+  }
+}
+
+.status-col {
+  .cell {
+    padding: 0 10px;
+    text-align: center;
+
+    .el-tag {
+      margin-right: 0px;
+    }
+  }
+}
+
+// to fixed https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+  transform: none;
+  left: 0;
+  position: relative;
+  margin: 0 auto;
+  border-radius: 16px;
+  box-shadow: 0px 4px 20px 0px rgba(63,89,117,0.1);
+}
+.el-dialog__title {
+  font-size: 18px;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: bold;
+  color: #1E2E41;
+}
+.el-dialog__body {
+  padding: 30px 20px 20px;
+}
+.el-select {
+  width: 100%;
+}
+.dialog-footer {
+  text-align: center;
+}
+.el-form-item__label {
+  font-weight: 400;
+  color: #1E2E41;
+  font-size: 14px;
+}
+
+// refine element ui upload
+.upload-container {
+  .el-upload {
+    width: 100%;
+
+    .el-upload-dragger {
+      width: 100%;
+      height: 200px;
+    }
+  }
+}
+
+// dropdown
+.el-dropdown-menu {
+  a {
+    display: block
+  }
+}
+
+// fix date-picker ui bug in filter-item
+.el-range-editor.el-input__inner {
+  display: inline-flex !important;
+}
+
+// to fix el-date-picker css style
+.el-range-separator {
+  box-sizing: content-box;
+}
+
+.el-menu--collapse
+> div
+> .el-submenu
+> .el-submenu__title
+.el-submenu__icon-arrow {
+  display: none;
+}
+
+.el-table .el-table__header-wrapper th, .el-table .el-table__fixed-header-wrapper th {
+  height: 42px !important;
+  // background: #EDF0F6 !important;
+  background: rgb(236, 241, 255) !important;
+  font-size: 14px !important;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: 550 !important;
+  color: #34354B !important;
+}
+.el-table th.el-table__cell.is-leaf, .el-table td.el-table__cell {
+  padding: 5px 0 !important;
+  height: 42px !important;
+  border-bottom: 0;
+}
+.el-table::before {
+  height: 0 !important;
+}
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: #F4F8FF !important;
+}
+.el-table__header-wrapper{
+  border-radius: 2px;
+}
+.el-input.is-disabled .el-input__inner {
+  background-color: #F8FBFF;
+  border-color: #CFD5E0;
+}
+
+.el-pagination__editor.el-input .el-input__inner {
+  line-height: 28px;
+}
+.el-table__fixed-right::before {
+  background-color: transparent;
+}
+.el-table td {
+  font-size: 13px !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+  border-left:0!important;
+  border-right:1px solid #e8e8e8!important
+}
+
+.el-table__row:hover td {
+  background-color: #e0f7fa !important;
+}
+.el-table {
+  border-left: 1px solid #e8e8e8 !important;
+  border: 0;
+}
+.el-table--group::after, .el-table--border::after{
+ width: 0
+}
+
+

@@ -1,0 +1,8 @@
+[AI Connector] ============================================
+[AI Connector] Starting Model-Agnostic AI Connector...
+[AI Connector] Model: deepseek-chat
+[AI Connector] API URL: https://api.deepseek.com/v1
+[AI Connector] Loaded skills: 
+[AI Connector] ============================================
+[AI Connector] Connecting to ws://localhost:9999...
+[AI Connector] Connected to WebSocket Bridge

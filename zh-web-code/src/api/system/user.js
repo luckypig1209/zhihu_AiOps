@@ -1,0 +1,178 @@
+import request from '@/utils/request'
+import { praseStrEmpty } from "@/utils/ruoyi";
+
+// 查询用户列表
+export function listUser(query) {
+  return request({
+    url: '/system/user/page',
+    method: 'get',
+    params: query
+  })
+}
+
+// 获取用户精简信息列表
+export function listSimpleUsers() {
+  return request({
+    url: '/system/user/list-all-simple',
+    method: 'get'
+  })
+}
+
+// 查询用户详细
+export function getUser(userId) {
+  return request({
+    url: '/system/user/get?id=' + praseStrEmpty(userId),
+    method: 'get'
+  })
+}
+
+// 新增用户
+export function addUser(data) {
+  return request({
+    url: '/system/user/create',
+    method: 'post',
+    data: data
+  })
+}
+
+// 修改用户
+export function updateUser(data) {
+  return request({
+    url: '/system/user/update',
+    method: 'post',
+    data: data
+  })
+}
+
+// 删除用户
+export function delUser(userId) {
+  return request({
+    url: '/system/user/delete?id=' + userId,
+    method: 'post'
+  })
+}
+
+// 导出用户
+export function exportUser(query) {
+  return request({
+    url: '/system/user/export',
+    method: 'get',
+    params: query,
+    responseType: 'blob'
+  })
+}
+
+// 用户密码重置
+export function resetUserPwd(id, password) {
+  const data = {
+    id,
+    password
+  }
+  return request({
+    url: '/system/user/update-password',
+    method: 'post',
+    data: data
+  })
+}
+
+// 用户状态修改
+export function changeUserStatus(id, status) {
+  const data = {
+    id,
+    status
+  }
+  return request({
+    url: '/system/user/update-status',
+    method: 'post',
+    data: data
+  })
+}
+
+// 查询用户个人信息
+export function getUserProfile() {
+  return request({
+    url: '/system/user/profile/get',
+    method: 'get'
+  })
+}
+
+// 修改用户个人信息
+export function updateUserProfile(data) {
+  return request({
+    url: '/system/user/profile/update',
+    method: 'post',
+    data: data
+  })
+}
+
+// 用户密码重置
+export function updateUserPwd(oldPassword, newPassword) {
+  const data = {
+    oldPassword,
+    newPassword
+  }
+  return request({
+    url: '/system/user/profile/update-password',
+    method: 'post',
+    data: data
+  })
+}
+
+// 用户头像上传
+export function uploadAvatar(data) {
+  return request({
+    url: '/system/user/profile/update-avatar',
+    method: 'post',
+    data: data
+  })
+}
+
+// 下载用户导入模板
+export function importTemplate() {
+  return request({
+    url: '/system/user/get-import-template',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+// 判断当前部门是否是数据专区
+export function checkIsBeLongDept(data) {
+  return request({
+    url: '/system/dept/checkIsBeLongDept',
+    method: 'post',
+    params: data
+  })
+}
+
+// 资产校验
+export function checkFlowAsset(data) {
+  return request({
+    url: '/cqt/flow-asset/changeCheck',
+    method: 'post',
+    data: data
+  })
+}
+
+// 获取资产可用资源
+
+export function getFlowAsset(data) {
+  return request({
+    url: '/cqt/asset-pool/get-by-params',
+    method: 'post',
+    data: data
+  })
+}
+// 用户密码重置
+export function newUpdateUserPwd(username, oldPassword, newPassword) {
+  const data = {
+    username,
+    oldPassword,
+    newPassword
+  }
+  return request({
+    url: '/system/user/reset-password',
+    method: 'post',
+    data: data
+  })
+}

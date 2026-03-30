@@ -1,0 +1,26 @@
+[WebSocket Bridge] Server started on port 9999
+[WebSocket Bridge] Waiting for connections...
+[WebSocket Bridge] New connection: 6a248df2-8b96-4d7e-8e2c-cf8a6c89a3f6
+[WebSocket Bridge] Received [register] from unknown
+[WebSocket Bridge] Claude CLI registered
+[WebSocket Bridge] New connection: 6f730cab-f02e-4de1-8047-7b2e95933d59
+[WebSocket Bridge] Received [register] from unknown
+[WebSocket Bridge] Frontend registered
+[WebSocket Bridge] New connection: 3d0a6c39-e336-4b1a-a583-e0a2b458c4dd
+[WebSocket Bridge] Received [register] from unknown
+[WebSocket Bridge] Frontend registered
+[WebSocket Bridge] Received [ping] from unknown
+[WebSocket Bridge] Received [ping] from unknown
+[WebSocket Bridge] Connection closed: 6f730cab-f02e-4de1-8047-7b2e95933d59
+[WebSocket Bridge] Frontend disconnected
+[WebSocket Bridge] New connection: 7d49ae52-1c7f-4450-bf29-51da9fd382f5
+[WebSocket Bridge] Received [register] from unknown
+[WebSocket Bridge] Frontend registered
+[WebSocket Bridge] Received [get_config] from unknown
+[WebSocket Bridge] Query [092c834b-48a0-4c03-ad10-9fefb4e9d152] forwarded to Claude
+[WebSocket Bridge] Received [response] from unknown
+[WebSocket Bridge] Received [ping] from unknown
+[WebSocket Bridge] Received [ping] from unknown
+[WebSocket Bridge] Received [ping] from unknown
+[WebSocket Bridge] Connection closed: 6a248df2-8b96-4d7e-8e2c-cf8a6c89a3f6
+[WebSocket Bridge] Claude CLI disconnected

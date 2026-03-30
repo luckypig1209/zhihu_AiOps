@@ -1,0 +1,21 @@
+{
+  "name": "zhihu-websocket-bridge",
+  "version": "1.0.0",
+  "description": "WebSocket bridge between frontend and Claude AI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "claude": "node claude-ai-connector.js",
+    "ai": "node ai-connector.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "axios": "^1.13.6",
+    "uuid": "^9.0.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

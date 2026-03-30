@@ -1,0 +1,24 @@
+[AI Connector] ============================================
+[AI Connector] Starting Model-Agnostic AI Connector...
+[AI Connector] Model: deepseek-chat
+[AI Connector] API URL: https://api.deepseek.com/v1
+[AI Connector] Loaded skills: victoriametrics, zabbix, dashboard, asset, cmdb, monitor
+[AI Connector] ============================================
+[AI Connector] Connecting to ws://localhost:9999...
+[AI Connector] Connected to WebSocket Bridge
+[AI Connector] Received query: "undefined"
+[AI Connector] Starting AI execution...
+[AI Connector] Calling LLM: deepseek-chat
+[AI Connector] Received query: "undefined"
+[AI Connector] Starting AI execution...
+[AI Connector] Calling LLM: deepseek-chat
+[AI Connector] Received query: "查询最近1小时内CPU总使用率"
+[AI Connector] Starting AI execution...
+[AI Connector] Calling LLM: deepseek-chat
+[AI Connector] AI requested 1 tool calls
+[AI Connector] Executing tool: query_victoriametrics {
+  query: '100 - cpu_usage_idle{cpu="cpu-total"}',
+  time_range: '1h',
+  step: '60s'
+}
+[AI Connector] Calling LLM: deepseek-chat
