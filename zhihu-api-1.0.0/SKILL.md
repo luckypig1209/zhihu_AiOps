@@ -97,8 +97,10 @@ Token 通过登录接口获取，有效期过期后需要刷新。
 | 资产导入模板 | `/cqt/asset-info/export-template` | 下载导入模板 |
 | 资产导入 | `/cqt/asset-info/import/{modelId}` | 导入资产数据 |
 | 资产导出 | `/cqt/asset-info/export` | 导出资产数据 |
+| 操作系统监控创建 | `/zhihu/snmp/testConnect` + `/cqt/asset-info/create` | 测试连通性并创建操作系统监控 |
 
 📄 **详细参数**: `references/api_asset.md`
+📄 **操作系统监控 skill**: `references/add-os-monitor.md`
 
 ### 3. 监控中心 (Monitor)
 
