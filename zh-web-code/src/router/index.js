@@ -81,7 +81,7 @@ export const constantRoutes = [
   },
   // AI智能问答助手
   {
-    path: "/ai-assistant",
+    path: "/ai-assistant/:moduleId?",
     component: (resolve) => require(["@/views/aiAssistant"], resolve),
     name: "AIAssistant",
     hidden: true,
@@ -267,12 +267,23 @@ export const constantRoutes = [
     children: [
       {
         path: "",
-        component: (resolve) => require(["@/views/aiAssistant/index.vue"], resolve),
+        component: (resolve) => require(["@/views/digitalStaff/index.vue"], resolve),
         name: "SmartQAIndex",
         meta: {
           title: "智能问答",
           icon: "message",
           noCache: true,
+        },
+      },
+      {
+        path: "chat/:moduleId",
+        component: (resolve) => require(["@/views/aiAssistant/index.vue"], resolve),
+        name: "SmartQAChat",
+        meta: {
+          title: "智能问答",
+          icon: "message",
+          noCache: true,
+          activeMenu: "/smart-qa",
         },
       },
     ],

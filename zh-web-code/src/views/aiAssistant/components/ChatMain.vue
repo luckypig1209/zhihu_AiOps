@@ -4,35 +4,50 @@
     <div class="welcome-page" v-if="messages.length === 0">
       <div class="welcome-content">
         <div class="welcome-logo">
-          <div class="logo-circle">
-            <i class="el-icon-cpu"></i>
+          <div class="logo-circle" :style="moduleConfig ? { background: moduleConfig.color } : {}">
+            <i :class="moduleConfig ? moduleConfig.icon : 'el-icon-cpu'"></i>
           </div>
-          <div class="logo-pulse"></div>
+          <div class="logo-pulse" :style="moduleConfig ? { background: moduleConfig.color } : {}"></div>
         </div>
-        <h1 class="welcome-title">智能问答助手</h1>
-        <p class="welcome-desc">欢迎使用您的专属AI运维工作台，让管理运维更简单高效</p>
+        <h1 class="welcome-title">{{ moduleConfig ? moduleConfig.welcomeTitle : '智能问答助手' }}</h1>
+        <p class="welcome-desc" v-if="!moduleConfig">欢迎使用您的专属AI运维工作台，让管理运维更简单高效</p>
+        <pre class="welcome-message" v-if="moduleConfig">{{ moduleConfig.welcomeMessage }}</pre>
 
         <div class="feature-cards">
-          <div class="feature-card" @click="$emit('send', '查询最近1小时内CPU总使用率')">
-            <i class="el-icon-data-line"></i>
-            <span>指标查询</span>
-            <p>查询 CPU、内存、磁盘等监控指标</p>
-          </div>
-          <div class="feature-card" @click="$emit('send', '查询目前监控了多少网络设备')">
-            <i class="el-icon-monitor"></i>
-            <span>设备管理</span>
-            <p>查询和管理监控对象信息</p>
-          </div>
-          <div class="feature-card" @click="$emit('send', '执行全面巡检')">
-            <i class="el-icon-finished"></i>
-            <span>智能巡检</span>
-            <p>一键执行全面基础设施健康检查</p>
-          </div>
-          <div class="feature-card" @click="$emit('send', '查看当前告警')">
-            <i class="el-icon-warning-outline"></i>
-            <span>告警中心</span>
-            <p>查看当前系统告警和异常</p>
-          </div>
+          <template v-if="moduleConfig">
+            <div
+              class="feature-card"
+              v-for="cap in moduleConfig.capabilities"
+              :key="cap.label"
+              @click="$emit('send', cap.triggerText)"
+            >
+              <i :class="cap.icon"></i>
+              <span>{{ cap.label }}</span>
+              <p>{{ cap.desc }}</p>
+            </div>
+          </template>
+          <template v-else>
+            <div class="feature-card" @click="$emit('send', '查询最近1小时内CPU总使用率')">
+              <i class="el-icon-data-line"></i>
+              <span>指标查询</span>
+              <p>查询 CPU、内存、磁盘等监控指标</p>
+            </div>
+            <div class="feature-card" @click="$emit('send', '查询目前监控了多少网络设备')">
+              <i class="el-icon-monitor"></i>
+              <span>设备管理</span>
+              <p>查询和管理监控对象信息</p>
+            </div>
+            <div class="feature-card" @click="$emit('send', '执行全面巡检')">
+              <i class="el-icon-finished"></i>
+              <span>智能巡检</span>
+              <p>一键执行全面基础设施健康检查</p>
+            </div>
+            <div class="feature-card" @click="$emit('send', '查看当前告警')">
+              <i class="el-icon-warning-outline"></i>
+              <span>告警中心</span>
+              <p>查看当前系统告警和异常</p>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -82,7 +97,7 @@
         <textarea
           ref="inputRef"
           v-model="inputText"
-          placeholder="输入您的问题... (Enter 发送, Shift+Enter 换行)"
+          :placeholder="moduleConfig && moduleConfig.inputPlaceholder ? moduleConfig.inputPlaceholder : '输入您的问题... (Enter 发送, Shift+Enter 换行)'"
           @keydown="handleKeyDown"
           :disabled="isLoading"
           rows="1"
@@ -112,6 +127,10 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    moduleConfig: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -319,6 +338,20 @@ $primary-light: rgba(24, 144, 255, 0.08);
   font-size: 14px;
   color: #8c94a5;
   margin: 0 0 36px 0;
+}
+
+.welcome-message {
+  font-size: 14px;
+  color: #5a6577;
+  line-height: 2;
+  text-align: left;
+  display: inline-block;
+  margin: 0 0 32px 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .feature-cards {

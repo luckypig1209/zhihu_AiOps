@@ -5,13 +5,9 @@
  * 架构：
  * 1. 支持任意 OpenAI 兼容 API (Kimi, DeepSeek, OpenAI, Claude 等)
  * 2. 使用 Function Calling / Tools 模式
- * 3. Skills 作为上下文加载，模型自主决策
+ * 3. Skills 从 SKILLS_DIR 自动扫描 *.md 文件加载
  * 4. 多轮对话：模型生成工具调用 → 执行 → 模型生成最终回复
- *
- * 环境变量：
- * - OPENAI_BASE_URL: API 基础地址 (默认: https://api.kimi.com/coding/)
- * - OPENAI_API_KEY: API Key
- * - OPENAI_MODEL: 模型名称 (默认: kimi-k2.5)
+ * 5. 大模型配置通过前端页面动态管理（update_config），不依赖环境变量
  */
 
 const WebSocket = require('ws');
@@ -22,11 +18,11 @@ const fs = require('fs');
 // ==================== 配置 ====================
 const WS_URL = process.env.WS_URL || 'ws://localhost:9999';
 
-// 可变配置（支持前端动态修改）
+// 可变配置（前端页面动态修改，以下仅为初始默认值）
 let currentConfig = {
-  apiUrl: process.env.OPENAI_BASE_URL || 'https://api.deepseek.com/v1',
-  apiKey: (process.env.OPENAI_API_KEY || 'sk-4d825f3cdfd94c919bc9b41d7c8c4f37').trim(),
-  model: process.env.OPENAI_MODEL || 'deepseek-chat',
+  apiUrl: 'https://api.deepseek.com/v1',
+  apiKey: '',
+  model: 'deepseek-chat',
   useAnthropicFormat: false
 };
 
@@ -39,19 +35,24 @@ const SKILLS_DIR = process.env.SKILLS_DIR || '/app/skills';
 let skills = loadAllSkills();
 
 function loadAllSkills() {
-  const skillFiles = [
-    { name: 'victoriametrics', file: 'api_victoriametrics.md' },
-    { name: 'zabbix', file: 'api_zabbix.md' },
-    { name: 'dashboard', file: 'api_dashboard.md' },
-    { name: 'asset', file: 'api_asset.md' },
-    { name: 'cmdb', file: 'api_cmdb.md' },
-    { name: 'monitor', file: 'api_monitor.md' }
-  ];
-
   const loaded = {};
-  for (const { name, file } of skillFiles) {
-    const content = loadSkillFile(file);
-    if (content) loaded[name] = content;
+  try {
+    if (!fs.existsSync(SKILLS_DIR)) {
+      console.warn(`[AI Connector] Skills directory not found: ${SKILLS_DIR}`);
+      return loaded;
+    }
+    const files = fs.readdirSync(SKILLS_DIR).filter(f => f.endsWith('.md'));
+    for (const file of files) {
+      const content = loadSkillFile(file);
+      if (content) {
+        // 文件名转 skill 名: api_zabbix.md -> zabbix, add-os-monitor.md -> add_os_monitor
+        const name = file.replace(/\.md$/, '').replace(/^api_/, '').replace(/-/g, '_');
+        loaded[name] = content;
+      }
+    }
+    console.log(`[AI Connector] Auto-loaded ${Object.keys(loaded).length} skills: ${Object.keys(loaded).join(', ')}`);
+  } catch (e) {
+    console.error('[AI Connector] Failed to scan skills directory:', e.message);
   }
   return loaded;
 }
@@ -143,6 +144,74 @@ const tools = [
           }
         },
         required: ['endpoint']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'add_os_monitor',
+      description: '新增单台操作系统监控。先测试SSH连通性，通过后创建监控资产。如果用户要新增多台，请使用 batch_add_os_monitor。',
+      parameters: {
+        type: 'object',
+        properties: {
+          monitorIp: {
+            type: 'string',
+            description: '目标主机IP地址'
+          },
+          monitorPort: {
+            type: 'string',
+            description: 'SSH端口',
+            default: '22'
+          },
+          userName: {
+            type: 'string',
+            description: 'SSH用户名'
+          },
+          password: {
+            type: 'string',
+            description: 'SSH密码'
+          },
+          name: {
+            type: 'string',
+            description: '监控名称（用户自定义）'
+          },
+          osType: {
+            type: 'string',
+            description: '操作系统类型：1=Windows, 2=Linux',
+            default: '2'
+          }
+        },
+        required: ['monitorIp', 'userName', 'password', 'name']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'batch_add_os_monitor',
+      description: '批量新增多台操作系统监控。当用户需要同时添加2台及以上主机监控时使用此工具，比逐台添加更高效。',
+      parameters: {
+        type: 'object',
+        properties: {
+          hosts: {
+            type: 'array',
+            description: '主机列表',
+            items: {
+              type: 'object',
+              properties: {
+                monitorIp: { type: 'string', description: '目标主机IP地址' },
+                monitorPort: { type: 'string', description: 'SSH端口', default: '22' },
+                userName: { type: 'string', description: 'SSH用户名' },
+                password: { type: 'string', description: 'SSH密码' },
+                name: { type: 'string', description: '监控名称（用户自定义）' },
+                osType: { type: 'string', description: '操作系统类型：1=Windows, 2=Linux', default: '2' }
+              },
+              required: ['monitorIp', 'userName', 'password', 'name']
+            }
+          }
+        },
+        required: ['hosts']
       }
     }
   }
@@ -662,6 +731,12 @@ async function executeToolCall(toolCall) {
       case 'query_zhihu_api':
         result = await queryZhihuAPI(args);
         break;
+      case 'add_os_monitor':
+        result = await addOsMonitor(args);
+        break;
+      case 'batch_add_os_monitor':
+        result = await batchAddOsMonitor(args);
+        break;
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -842,7 +917,169 @@ async function queryZhihuAPI(args) {
   }
 }
 
+// 新增操作系统监控（完整流程：登录→获取模型→测试连通→创建）
+async function addOsMonitor(args) {
+  const ZHIHU_API_URL = process.env.ZHIHU_API_URL || 'http://117.89.88.210:58080/admin-api';
+  const { monitorIp, monitorPort = '22', userName, password, name, osType = '2' } = args;
+
+  try {
+    // 1. 登录获取 Token
+    const token = await getZhihuToken();
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    // 2. 获取操作系统模型的 modelId
+    const pageRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-model/page`, { pageNo: 1, pageSize: 50 }, { headers, timeout: 10000 });
+    const models = (pageRes.data.data && pageRes.data.data.list) || [];
+    const osModel = models.find(m => m.modelCode === 'operatesystem');
+    if (!osModel) return { success: false, error: '未找到操作系统资产模型' };
+
+    // 3. 获取 items（字段定义）
+    const modelRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-model/get`, { id: osModel.id }, { headers, timeout: 10000 });
+    const modelData = modelRes.data.data;
+    if (!modelData || !modelData.items) return { success: false, error: '获取模型字段失败' };
+
+    const itemMap = {};
+    modelData.items.forEach(item => { itemMap[item.itemCode] = item.id; });
+
+    // 4. 测试连通性
+    const testRes = await axios.post(`${ZHIHU_API_URL}/zhihu/snmp/testConnect`, {
+      userName, monitorPort, monitorIp, password, pmMonitorType: 2, modelCode: 'operatesystem'
+    }, { headers, timeout: 30000 });
+
+    if (testRes.data.data !== true) {
+      return { success: false, error: `连通性测试失败: ${testRes.data.msg || '无法连接目标主机'}`, ip: monitorIp, port: monitorPort };
+    }
+
+    // 5. 创建监控
+    const createRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-info/create`, {
+      assetTypeId: modelData.assetTypeId,
+      modelId: modelData.id,
+      modelCode: 'operatesystem',
+      monitorMethod: 1,
+      items: [
+        { itemId: itemMap['name'], itemValue: name, itemCode: 'name' },
+        { itemId: itemMap['ip'], itemValue: monitorIp, itemCode: 'ip' },
+        { itemId: itemMap['asset_optional_operate_system_type'], itemValue: osType, itemCode: 'asset_optional_operate_system_type' },
+        { itemId: itemMap['version'], itemValue: '', itemCode: 'version' },
+        { itemId: itemMap['cpu'], itemValue: '', itemCode: 'cpu' },
+        { itemId: itemMap['disk'], itemValue: '', itemCode: 'disk' },
+        { itemId: itemMap['memory'], itemValue: '', itemCode: 'memory' },
+        { itemId: itemMap['remark'], itemValue: '', itemCode: 'remark' }
+      ],
+      assetSnmp: { monitorIp, monitorPort, userName, password }
+    }, { headers, timeout: 10000 });
+
+    if (createRes.data.code === 0) {
+      return { success: true, message: '操作系统监控创建成功', assetId: createRes.data.data, name, ip: monitorIp, port: monitorPort, osType: osType === '2' ? 'Linux' : 'Windows' };
+    } else {
+      return { success: false, error: createRes.data.msg || '创建失败', code: createRes.data.code };
+    }
+  } catch (error) {
+    console.error('[AI Connector] 新增OS监控失败:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// 批量新增操作系统监控（Token/模型/字段只获取一次，循环测试连通+创建）
+async function batchAddOsMonitor(args) {
+  const ZHIHU_API_URL = process.env.ZHIHU_API_URL || 'http://117.89.88.210:58080/admin-api';
+  const { hosts } = args;
+
+  if (!hosts || hosts.length === 0) {
+    return { success: false, error: '主机列表为空' };
+  }
+
+  try {
+    // 1. 登录获取 Token（只做一次）
+    const token = await getZhihuToken();
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    // 2. 获取操作系统模型的 modelId（只做一次）
+    const pageRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-model/page`, { pageNo: 1, pageSize: 50 }, { headers, timeout: 10000 });
+    const models = (pageRes.data.data && pageRes.data.data.list) || [];
+    const osModel = models.find(m => m.modelCode === 'operatesystem');
+    if (!osModel) return { success: false, error: '未找到操作系统资产模型' };
+
+    // 3. 获取 items 字段定义（只做一次）
+    const modelRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-model/get`, { id: osModel.id }, { headers, timeout: 10000 });
+    const modelData = modelRes.data.data;
+    if (!modelData || !modelData.items) return { success: false, error: '获取模型字段失败' };
+
+    const itemMap = {};
+    modelData.items.forEach(item => { itemMap[item.itemCode] = item.id; });
+
+    // 4. 逐台测试连通性 + 创建
+    const results = [];
+    for (const host of hosts) {
+      const { monitorIp, monitorPort = '22', userName, password, name, osType = '2' } = host;
+      try {
+        // 测试连通性
+        const testRes = await axios.post(`${ZHIHU_API_URL}/zhihu/snmp/testConnect`, {
+          userName, monitorPort, monitorIp, password, pmMonitorType: 2, modelCode: 'operatesystem'
+        }, { headers, timeout: 30000 });
+
+        if (testRes.data.data !== true) {
+          results.push({ name, ip: monitorIp, success: false, error: `连通性测试失败: ${testRes.data.msg || '无法连接目标主机'}` });
+          continue;
+        }
+
+        // 创建监控
+        const createRes = await axios.post(`${ZHIHU_API_URL}/cqt/asset-info/create`, {
+          assetTypeId: modelData.assetTypeId,
+          modelId: modelData.id,
+          modelCode: 'operatesystem',
+          monitorMethod: 1,
+          items: [
+            { itemId: itemMap['name'], itemValue: name, itemCode: 'name' },
+            { itemId: itemMap['ip'], itemValue: monitorIp, itemCode: 'ip' },
+            { itemId: itemMap['asset_optional_operate_system_type'], itemValue: osType, itemCode: 'asset_optional_operate_system_type' },
+            { itemId: itemMap['version'], itemValue: '', itemCode: 'version' },
+            { itemId: itemMap['cpu'], itemValue: '', itemCode: 'cpu' },
+            { itemId: itemMap['disk'], itemValue: '', itemCode: 'disk' },
+            { itemId: itemMap['memory'], itemValue: '', itemCode: 'memory' },
+            { itemId: itemMap['remark'], itemValue: '', itemCode: 'remark' }
+          ],
+          assetSnmp: { monitorIp, monitorPort, userName, password }
+        }, { headers, timeout: 10000 });
+
+        if (createRes.data.code === 0) {
+          results.push({ name, ip: monitorIp, success: true, assetId: createRes.data.data, osType: osType === '2' ? 'Linux' : 'Windows' });
+        } else {
+          results.push({ name, ip: monitorIp, success: false, error: createRes.data.msg || '创建失败' });
+        }
+      } catch (error) {
+        console.error(`[AI Connector] 批量新增-${name}(${monitorIp})失败:`, error.message);
+        results.push({ name, ip: monitorIp, success: false, error: error.message });
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    return {
+      success: successCount > 0,
+      total: hosts.length,
+      successCount,
+      failCount: hosts.length - successCount,
+      results
+    };
+  } catch (error) {
+    console.error('[AI Connector] 批量新增OS监控失败:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
 // ==================== 消息构建 ====================
+
+// 动态拼接所有已加载的 skills 文档
+function buildSkillsDocs() {
+  const docs = [];
+  for (const [name, content] of Object.entries(skills)) {
+    // 每个 skill 截取前 2000 字符，避免 prompt 过长
+    const truncated = content.length > 2000 ? content.substring(0, 2000) + '\n...(已截断)' : content;
+    docs.push(`### ${name}\n\n${truncated}`);
+  }
+  return docs.length > 0 ? docs.join('\n\n') : '暂无 Skills 文档';
+}
+
 function buildSystemMessage() {
   return `你是智护运维平台的 AI 助手，专门帮助用户查询监控数据和执行运维操作。
 
@@ -853,6 +1090,8 @@ function buildSystemMessage() {
 1. **query_victoriametrics** - 查询 VictoriaMetrics 指标（PromQL），返回时序数据
 2. **query_zabbix** - 查询 Zabbix 监控数据，包括主机、监控项、告警等
 3. **query_zhihu_api** - 查询智护运维平台数据，包括资产、CMDB、告警等
+4. **add_os_monitor** - 新增单台操作系统监控（SSH连通测试 + 创建监控资产）
+5. **batch_add_os_monitor** - 批量新增多台操作系统监控（用户要添加2台及以上时必须使用此工具，只需一次调用）
 
 ## 智护平台 API 对应关系（重要）
 
@@ -865,6 +1104,8 @@ function buildSystemMessage() {
 | 资产模型 | \`/cqt/asset-model/page\` | 查询资产模型定义 |
 | 网络设备、监控的主机 | 使用 query_zabbix 的 \`host.get\` | Zabbix 主机 |
 | 告警、报警、故障 | \`/monitor/alarms/overview/*\` | 告警概览 |
+| 新增/添加 Linux/Windows 监控 | 使用 add_os_monitor 工具 | 需要 IP、端口、用户名、密码、名称 |
+| 批量新增多台监控 | 使用 batch_add_os_monitor 工具 | 传入 hosts 数组，一次调用完成所有主机 |
 
 **特别注意**：
 - **查询资产的两步流程**：
@@ -874,28 +1115,11 @@ function buildSystemMessage() {
   - 资产 = 具体的设备/服务器 (asset-info，需要 modelId)
   - 资产模型 = 资产的数据结构定义 (asset-model)
 - "网络设备"优先使用 Zabbix 查询，因为 Zabbix 才是监控网络设备的核心系统
+- **新增监控**：当用户说"新增/添加一台主机监控"时，使用 add_os_monitor 工具，确保用户提供了 IP、用户名、密码、名称
 
 ## Skills 参考文档
 
-### VictoriaMetrics
-
-${skills.victoriametrics ? skills.victoriametrics.substring(0, 2000) : '未加载'}
-
-### Zabbix
-
-${skills.zabbix ? skills.zabbix.substring(0, 1500) : '未加载'}
-
-### 智护平台 - 资产中心
-
-${skills.asset ? skills.asset.substring(0, 1500) : ''}
-
-### 智护平台 - 监控中心
-
-${skills.monitor ? skills.monitor.substring(0, 1000) : ''}
-
-### 智护平台 - CMDB
-
-${skills.cmdb ? '\n' + skills.cmdb.substring(0, 800) : ''}
+${buildSkillsDocs()}
 
 ## 工作原则
 

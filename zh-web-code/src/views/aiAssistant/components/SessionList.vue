@@ -40,14 +40,16 @@
 </template>
 
 <script>
-const STORAGE_KEY = 'ai_assistant_sessions'
-
 export default {
   name: 'SessionList',
   props: {
     currentSessionId: {
       type: String,
       default: ''
+    },
+    storageKey: {
+      type: String,
+      default: 'ai_assistant_sessions'
     }
   },
   data() {
@@ -88,10 +90,16 @@ export default {
   created() {
     this.loadSessions()
   },
+  watch: {
+    storageKey() {
+      this.sessions = []
+      this.loadSessions()
+    }
+  },
   methods: {
     loadSessions() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY)
+        const saved = localStorage.getItem(this.storageKey)
         if (saved) {
           this.sessions = JSON.parse(saved)
         }
@@ -103,7 +111,7 @@ export default {
 
     saveSessions() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.sessions))
+        localStorage.setItem(this.storageKey, JSON.stringify(this.sessions))
       } catch (e) {
         console.error('保存会话列表失败:', e)
       }

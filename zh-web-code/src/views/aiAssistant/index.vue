@@ -7,6 +7,7 @@
         <SessionList
           ref="sessionList"
           :current-session-id="currentSessionId"
+          :storage-key="sessionStorageKey"
           @select="switchSession"
           @delete="onSessionDelete"
         />
@@ -18,6 +19,7 @@
           ref="chatMain"
           :messages="currentMessages"
           :is-loading="isLoading"
+          :module-config="moduleConfig"
           @send="handleSend"
         />
       </main>
@@ -26,6 +28,7 @@
       <aside class="right-panel anim-slide-right">
         <QuickCommands
           ref="quickCommands"
+          :external-commands="moduleQuickActions"
           @execute="handleQuickCommand"
           @open-config="showCommandConfig = true"
           @open-model-config="showModelConfig = true"
@@ -54,6 +57,7 @@ import CommandConfigDialog from './components/CommandConfigDialog.vue'
 import ModelConfigDialog from './components/ModelConfigDialog.vue'
 import SkillsEditorDialog from './components/SkillsEditorDialog.vue'
 import { processQuery } from '@/utils/opsQueryService'
+import { getModuleById, getSessionStorageKey } from '@/utils/digitalStaffConfig'
 
 const SESSIONS_STORAGE_KEY = 'ai_assistant_sessions'
 
@@ -75,6 +79,20 @@ export default {
       showCommandConfig: false,
       showModelConfig: false,
       showSkillsEditor: false
+    }
+  },
+  computed: {
+    moduleId() {
+      return this.$route.params.moduleId || null
+    },
+    moduleConfig() {
+      return getModuleById(this.moduleId)
+    },
+    sessionStorageKey() {
+      return getSessionStorageKey(this.moduleId)
+    },
+    moduleQuickActions() {
+      return this.moduleConfig ? this.moduleConfig.quickActions : null
     }
   },
   mounted() {
@@ -201,15 +219,19 @@ export default {
     },
 
     // 处理快捷指令
-    handleQuickCommand(content) {
-      // 需要用户补充参数的指令
-      const needInput = ['通过关键字查询监控对象', '通过IP查询监控对象']
-      if (needInput.includes(content)) {
-        // 仅填充到输入框，让用户补充参数
-        this.$refs.chatMain.fillInput(content + ' ')
-      } else {
-        // 直接发送
+    handleQuickCommand(command) {
+      const content = typeof command === 'string' ? command : command.content
+      const needInput = typeof command === 'object' && command.needInput
+      if (!needInput) {
+        // 硬编码兼容：旧的文本匹配
+        const legacyNeedInput = ['通过关键字查询监控对象', '通过IP查询监控对象']
+        if (legacyNeedInput.includes(content)) {
+          this.$refs.chatMain.fillInput(content + ' ')
+          return
+        }
         this.handleSend(content)
+      } else {
+        this.$refs.chatMain.fillInput(content)
       }
     },
 

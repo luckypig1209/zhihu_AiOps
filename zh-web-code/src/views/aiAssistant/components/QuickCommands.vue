@@ -26,7 +26,7 @@
             v-for="cmd in group.commands"
             :key="cmd.id"
             class="command-item"
-            @click="$emit('execute', cmd.content)"
+            @click="$emit('execute', cmd)"
             :title="cmd.content"
           >
             <i :class="cmd.icon || 'el-icon-right'"></i>
@@ -116,6 +116,12 @@ const DEFAULT_COMMANDS = [
 
 export default {
   name: 'QuickCommands',
+  props: {
+    externalCommands: {
+      type: Array,
+      default: null
+    }
+  },
   data() {
     return {
       commands: []
@@ -141,8 +147,18 @@ export default {
   created() {
     this.loadCommands()
   },
+  watch: {
+    externalCommands() {
+      this.loadCommands()
+    }
+  },
   methods: {
     loadCommands() {
+      // 如果有外部注入的指令（模块专属），优先使用
+      if (this.externalCommands) {
+        this.commands = [...this.externalCommands]
+        return
+      }
       try {
         const saved = localStorage.getItem(COMMANDS_STORAGE_KEY)
         if (saved) {

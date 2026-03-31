@@ -1,79 +1,149 @@
-离线模式
-当前 Claude CLI 未连接，使用离线模式。
 
-注意: 离线模式下无法获取实时数据。
 
-请检查：
+root@zhihuops:/data/zhihu/data/zhihu-proxy# cd conf.d/
+root@zhihuops:/data/zhihu/data/zhihu-proxy/conf.d# ls -l
+total 12
+-rw-r--r-- 1 root root  303 Jan  7 09:43 dataease.conf
+-rw------- 1 root root 4906 Jan  7 09:43 front.conf
+root@zhihuops:/data/zhihu/data/zhihu-proxy/conf.d# cat front.conf 
+server {
+    listen 58080;
 
-WebSocket Bridge Server 是否运行 (npm run ws:server)
+    server_name localhost;
 
-Claude CLI Connector 是否运行 (npm run ws:claude)
-您的查询：
-查询目前监控了多少网络设备根据 Zabbix 监控系统查询结果，目前监控的网络设备情况如下：
+    # 前端资源所在路径
+    root /etc/nginx/dist;
+ 
+    location / {
+        root /etc/nginx/dist;
+        try_files $uri $uri/ /index.html;
+        # index index.html index.htm;
+    }
 
-监控概况
-总计监控主机：5 台
+    location /download {
+       charset utf-8,gbk;
+       autoindex on;
+       autoindex_exact_size off;
+       autoindex_localtime on;
+       root /etc/html;
+    }
 
-网络设备（SNMP）：4 台
+    location /shell {
+       charset utf-8,gbk;
+       autoindex on;
+       autoindex_exact_size off;
+       autoindex_localtime on;
+       root /etc/html;
+    }
 
-Zabbix 服务器：1 台
-网络设备详情
-| 设备名称 | IP 地址 | 状态 | 接口类型 |
-|---------|--------|------|---------|
-| test | 192.168.56.11 | ✅ 在线 | SNMP |
-| zhihu-192.168.56.10 | 192.168.56.10 | ✅ 在线 | SNMP |
-| test-snmp-host-01 | 192.168.56.18 | ✅ 在线 | SNMP |
+    # AI服务代理 - 优化超时配置
+    location /admin-api/api/v1/ai/ {
+        proxy_pass http://zhihu-ai:8000/api/v1/ai/;
+        proxy_read_timeout 300s;      # 读取超时改为5分钟，适应复杂AI查询
+        proxy_connect_timeout 30s;    # 连接超时
+        proxy_send_timeout 300s;      # 发送超时改为5分钟
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-状态说明
-在线设备：3 台（网络设备全部在线）
+        # CORS配置
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
 
-不可用设备：1 台（hostid: 10435，可能已离线或配置异常）
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+            add_header 'Content-Length' 0;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            return 204;
+        }
+    }
 
-Zabbix 服务器：1 台（运行正常）
-> 💡 总结：目前通过 SNMP 协议监控的网络设备共 3 台在线运行，1 台处于不可用状态，需要关注不可用设备的离线原因。
+    # 资产管理API代理
+    location /admin-api/api/v1/assets/ {
+        proxy_pass http://zhihu-ai:8000/api/v1/assets/;
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 30s;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
 
-[AI Connector] Config updated: model=kimi-k2.5, url=https://ark.cn-beijing.volces.com/api/coding
-[AI Connector] Received query: "查询目前监控了多少网络设备"
-[AI Connector] Starting AI execution...
-[AI Connector] Calling LLM: kimi-k2.5
-[AI Connector] AI requested 1 tool calls
-[AI Connector] Executing tool: query_zabbix {
-  method: 'host.get',
-  params: {
-    output: [ 'hostid', 'host', 'name', 'status' ],
-    selectInterfaces: [ 'type', 'ip', 'dns' ],
-    selectGroups: [ 'name' ],
-    limit: 1000
-  }
+        # CORS配置
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+            add_header 'Content-Length' 0;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            return 204;
+        }
+    }
+
+    location /api/ai/ {
+        proxy_pass http://zhihu-ai:8000/api/v1/;
+        proxy_read_timeout 300s;      # 读取超时改为5分钟，适应复杂AI查询
+        proxy_connect_timeout 30s;    # 连接超时
+        proxy_send_timeout 300s;      # 发送超时改为5分钟
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # CORS配置
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+        
+        # 处理OPTIONS预检请求
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+            add_header 'Content-Length' 0;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            return 204;
+        }
+    }
+
+    # 后端代理
+    location /admin-api {
+        proxy_pass http://zhihu-server:48080/admin-api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /screen {
+        return 301 /screen/;
+    }
+
+    location /screen/ {
+        proxy_pass http://127.0.0.1:18100/;
+        proxy_redirect / /screen/;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 错误页面（根据需要自定义）
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
 }
-[AI Connector] Zabbix host.get 返回: 4 条记录
-[AI Connector] query_zabbix 返回: {"jsonrpc":"2.0","result":[{"hostid":"10084","host":"Zabbix server","name":"Zabbix server","status":"0","groups":[{"name":"Zabbix servers"}],"interfaces":[{"type":"1","ip":"172.2.5.219","dns":""}]},{"hostid":"10890","host":"test","name":"test","status":"0","groups":[{"name":"common-group"}],"interfaces":[{"type":"2","ip":"192.168.56.11","dns":""}]},{"hostid":"10932","host":"zhihu-192.168.56.10","name":"zhihu-192.168.56.10","status":"0","groups":[{"name":"common-group"}],"interfaces":[{"type":"2"...
-[AI Connector] Calling LLM (stream): kimi-k2.5
-[AI Connector] Stream complete: 503 chars
-[AI Connector] AI 回复内容: 根据 Zabbix 监控系统查询结果，目前监控的网络设备情况如下：
 
-## 监控概况
-
-**总计监控主机：5 台**
-- 网络设备（SNMP）：4 台
-- Zabbix 服务器：1 台
-
----
-
-## 网络设备详情
-
-| 设备名称 | IP 地址 | 状态 | 接口类型 |
-|---------|--------|------|---------|
-| test | 192.168.56.11 | ✅ 在线 | SNMP |
-| zhihu-192.168.56.10 | 192.168.56.10 | ✅ 在线 | SNMP |
-| test-snmp-host-01 | 192.168.56.18 | ✅ 在线 | SNMP |
-
----
-
-## 状态说明
-
-- **在线设备**：3 台（网络设备全部在线）
-- **不可用设备**：1 台（hostid: 10435，可能已离线或配置异常）
-- **Zabbix 服务器**：1 台（运行正常）
-
-> 💡 **总结**：目前通过 SNMP 协议监控的网络设备共 **3 台在线运行**，1 台处于不可用状态，需要关注不可用设备的离线原因。
+root@zhihuops:/data/zhihu/data/zhihu-proxy/conf.d# 
