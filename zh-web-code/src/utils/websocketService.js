@@ -8,7 +8,7 @@
  * 4. 自动重连和心跳
  */
 
-const WS_URL = process.env.VUE_APP_WS_URL || 'ws://localhost:9999'
+const WS_URL = process.env.VUE_APP_WS_URL || `ws://${window.location.host}/ws/`
 
 // 简单的 UUID 生成函数（浏览器端）
 function uuidv4() {

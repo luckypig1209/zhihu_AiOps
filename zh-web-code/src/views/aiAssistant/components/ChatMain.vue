@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-main">
+  <div class="chat-main" :style="moduleConfig ? { '--module-color': moduleConfig.color } : {}">
     <!-- 欢迎页 -->
     <div class="welcome-page" v-if="messages.length === 0">
       <div class="welcome-content">
@@ -262,14 +262,50 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary: #1890ff;
-$primary-light: rgba(24, 144, 255, 0.08);
+$primary: #2f6bff;
+$accent: #22d3ee;
+$ink: #0f172a;
+$muted: #5b6475;
+$surface: rgba(255, 255, 255, 0.82);
 
 .chat-main {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f7f8fa;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(34, 211, 238, 0.18), transparent 45%),
+    radial-gradient(circle at 82% 18%, rgba(47, 107, 255, 0.18), transparent 45%),
+    linear-gradient(180deg, #f6faff 0%, #eef4ff 65%, #f9fbff 100%);
+  font-family: 'Space Grotesk', 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+
+.chat-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.chat-main::after {
+  content: '';
+  position: absolute;
+  right: -120px;
+  bottom: -160px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.2), transparent 65%);
+  pointer-events: none;
+}
+
+.chat-main > * {
+  position: relative;
+  z-index: 1;
 }
 
 // ==================== 欢迎页 ====================
@@ -278,12 +314,18 @@ $primary-light: rgba(24, 144, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 32px 24px;
 }
 
 .welcome-content {
   text-align: center;
-  max-width: 680px;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(47, 107, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px 32px 28px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .welcome-logo {
@@ -301,6 +343,8 @@ $primary-light: rgba(24, 144, 255, 0.08);
     justify-content: center;
     position: relative;
     z-index: 1;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 12px 28px rgba(47, 107, 255, 0.25);
 
     i {
       font-size: 32px;
@@ -319,6 +363,7 @@ $primary-light: rgba(24, 144, 255, 0.08);
     background: $primary;
     animation: logoPulse 2s ease-in-out infinite;
     opacity: 0.25;
+    filter: blur(1px);
   }
 }
 
@@ -330,44 +375,48 @@ $primary-light: rgba(24, 144, 255, 0.08);
 .welcome-title {
   font-size: 24px;
   font-weight: 600;
-  color: #1f2d3d;
+  color: $ink;
   margin: 0 0 10px 0;
+  letter-spacing: 0.6px;
 }
 
 .welcome-desc {
   font-size: 14px;
-  color: #8c94a5;
+  color: #6b7280;
   margin: 0 0 36px 0;
 }
 
 .welcome-message {
   font-size: 14px;
-  color: #5a6577;
+  color: $muted;
   line-height: 2;
   text-align: left;
   display: inline-block;
   margin: 0 0 32px 0;
   white-space: pre-wrap;
   font-family: inherit;
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(47, 107, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
 }
 
 .feature-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 16px;
 
   .feature-card {
-    background: #fff;
-    border: 1px solid #e8ecf1;
-    border-radius: 10px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(47, 107, 255, 0.16);
+    border-radius: 14px;
     padding: 18px;
     cursor: pointer;
     transition: all 0.3s;
     text-align: left;
     animation: cardIn 0.5s ease-out both;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 
     &:nth-child(1) { animation-delay: 0.15s; }
     &:nth-child(2) { animation-delay: 0.25s; }
@@ -375,14 +424,14 @@ $primary-light: rgba(24, 144, 255, 0.08);
     &:nth-child(4) { animation-delay: 0.45s; }
 
     &:hover {
-      border-color: $primary;
-      box-shadow: 0 4px 16px rgba(24, 144, 255, 0.12);
+      border-color: rgba(47, 107, 255, 0.35);
+      box-shadow: 0 16px 36px rgba(47, 107, 255, 0.18);
       transform: translateY(-2px);
     }
 
     i {
       font-size: 22px;
-      color: $primary;
+      color: var(--module-color, #2f6bff);
       margin-bottom: 8px;
       display: block;
     }
@@ -390,14 +439,14 @@ $primary-light: rgba(24, 144, 255, 0.08);
     span {
       font-size: 14px;
       font-weight: 600;
-      color: #1f2d3d;
+      color: $ink;
       display: block;
       margin-bottom: 4px;
     }
 
     p {
       font-size: 12px;
-      color: #8c94a5;
+      color: #6b7280;
       margin: 0;
       line-height: 1.4;
     }
@@ -413,13 +462,15 @@ $primary-light: rgba(24, 144, 255, 0.08);
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 26px 24px 18px;
+  background: rgba(255, 255, 255, 0.38);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
 
   &::-webkit-scrollbar {
     width: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #d0d5dd;
+    background: rgba(47, 107, 255, 0.25);
     border-radius: 3px;
   }
 }
@@ -433,9 +484,10 @@ $primary-light: rgba(24, 144, 255, 0.08);
     flex-direction: row-reverse;
 
     .message-bubble {
-      background: $primary;
+      background: linear-gradient(135deg, var(--module-color, #2f6bff), #22d3ee);
       color: #fff;
       border-radius: 16px 16px 4px 16px;
+      box-shadow: 0 12px 28px rgba(47, 107, 255, 0.25);
     }
 
     .message-time {
@@ -445,11 +497,12 @@ $primary-light: rgba(24, 144, 255, 0.08);
 
   &.ai {
     .message-bubble {
-      background: #fff;
-      color: #333;
-      border: 1px solid #e8ecf1;
+      background: $surface;
+      color: #1f2937;
+      border: 1px solid rgba(47, 107, 255, 0.14);
       border-radius: 16px 16px 16px 4px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      backdrop-filter: blur(10px);
     }
   }
 }
@@ -470,16 +523,17 @@ $primary-light: rgba(24, 144, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
 
     i { font-size: 16px; color: #fff; }
   }
 
   .user-avatar {
-    background: $primary;
+    background: linear-gradient(135deg, var(--module-color, #2f6bff), #22d3ee);
   }
 
   .ai-avatar {
-    background: #36cfc9;
+    background: linear-gradient(135deg, #14b8a6, #0ea5e9);
   }
 }
 
@@ -493,6 +547,7 @@ $primary-light: rgba(24, 144, 255, 0.08);
   line-height: 1.6;
   font-size: 14px;
   word-wrap: break-word;
+  letter-spacing: 0.2px;
 
   &.typing {
     display: flex;
@@ -504,7 +559,7 @@ $primary-light: rgba(24, 144, 255, 0.08);
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #999;
+      background: rgba(15, 23, 42, 0.45);
       animation: dotBounce 1.4s infinite ease-in-out;
 
       &:nth-child(1) { animation-delay: -0.32s; }
@@ -514,27 +569,27 @@ $primary-light: rgba(24, 144, 255, 0.08);
 
   // Markdown 样式
   ::v-deep {
-    .md-h2 { font-size: 18px; font-weight: 600; color: #1f2d3d; margin: 16px 0 8px; }
-    .md-h3 { font-size: 16px; font-weight: 600; color: #2c3e50; margin: 12px 0 6px; }
-    .md-h4 { font-size: 14px; font-weight: 600; color: #34495e; margin: 10px 0 4px; }
+    .md-h2 { font-size: 18px; font-weight: 600; color: #0f172a; margin: 16px 0 8px; }
+    .md-h3 { font-size: 16px; font-weight: 600; color: #1e293b; margin: 12px 0 6px; }
+    .md-h4 { font-size: 14px; font-weight: 600; color: #334155; margin: 10px 0 4px; }
     .md-p { margin: 8px 0; }
-    .md-hr { border: none; border-top: 1px solid #e8e8e8; margin: 12px 0; }
+    .md-hr { border: none; border-top: 1px solid rgba(15, 23, 42, 0.12); margin: 12px 0; }
     .md-ul, .md-ol { margin: 8px 0; padding-left: 20px; }
     .md-li { margin: 4px 0; list-style: disc; }
     .md-li-ordered { margin: 4px 0; list-style: decimal; }
 
     .inline-code {
-      background: #f0f2f5;
+      background: rgba(47, 107, 255, 0.08);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: 'Monaco', 'Consolas', monospace;
       font-size: 0.9em;
-      color: #e74c3c;
+      color: #d9480f;
     }
 
     .code-block {
-      background: #1e1e2e;
-      color: #cdd6f4;
+      background: #0f172a;
+      color: #e2e8f0;
       padding: 12px 16px;
       border-radius: 8px;
       overflow-x: auto;
@@ -550,14 +605,14 @@ $primary-light: rgba(24, 144, 255, 0.08);
       }
     }
 
-    strong { font-weight: 600; color: #1f2d3d; }
-    em { font-style: italic; color: #666; }
+    strong { font-weight: 600; color: #0f172a; }
+    em { font-style: italic; color: #475569; }
   }
 }
 
 .message-time {
   font-size: 11px;
-  color: #b0b8c4;
+  color: #94a3b8;
   margin-top: 4px;
   padding: 0 4px;
 }
@@ -570,23 +625,24 @@ $primary-light: rgba(24, 144, 255, 0.08);
 // ==================== 输入区域 ====================
 .input-area {
   padding: 14px 24px 18px;
-  background: #fff;
-  border-top: 1px solid #e8ecf1;
+  background: rgba(255, 255, 255, 0.82);
+  border-top: 1px solid rgba(47, 107, 255, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .input-wrapper {
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  background: #f5f7fa;
-  border: 1px solid #dcdfe6;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(47, 107, 255, 0.2);
+  border-radius: 12px;
   padding: 8px 12px;
   transition: all 0.25s;
 
   &:focus-within {
-    border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+    border-color: rgba(47, 107, 255, 0.45);
+    box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
   }
 
   textarea {
@@ -597,14 +653,14 @@ $primary-light: rgba(24, 144, 255, 0.08);
     background: transparent;
     font-size: 14px;
     line-height: 1.5;
-    color: #333;
+    color: #1f2937;
     min-height: 24px;
     max-height: 120px;
     font-family: inherit;
     padding: 4px 0;
 
     &::placeholder {
-      color: #b0b8c4;
+      color: #94a3b8;
     }
 
     &:disabled {
@@ -617,16 +673,18 @@ $primary-light: rgba(24, 144, 255, 0.08);
     flex-shrink: 0;
     width: 36px;
     height: 36px;
-    background: $primary;
+    background: linear-gradient(135deg, var(--module-color, #2f6bff), #22d3ee);
     border: none;
+    box-shadow: 0 10px 20px rgba(47, 107, 255, 0.2);
 
     &:hover:not(:disabled) {
-      background: #40a9ff;
+      background: linear-gradient(135deg, #3b82f6, #22d3ee);
     }
 
     &:disabled {
-      background: #d0d5dd;
+      background: #cbd5f5;
       opacity: 0.6;
+      box-shadow: none;
     }
   }
 }

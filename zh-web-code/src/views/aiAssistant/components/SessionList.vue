@@ -171,7 +171,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary: #1890ff;
+$primary: #2f6bff;
 
 .session-list {
   display: flex;
@@ -182,19 +182,21 @@ $primary: #1890ff;
 
 .session-header {
   padding: 16px;
-  border-bottom: 1px solid #e8ecf1;
+  border-bottom: 1px solid rgba(47, 107, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
 
   .new-session-btn {
     width: 100%;
-    background: #fff;
-    border: 1px dashed $primary;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px dashed rgba(47, 107, 255, 0.55);
     color: $primary;
     border-radius: 8px;
     transition: all 0.2s;
+    box-shadow: 0 10px 20px rgba(47, 107, 255, 0.12);
 
     &:hover {
-      background: rgba($primary, 0.06);
-      border-color: $primary;
+      background: rgba(47, 107, 255, 0.08);
+      border-color: rgba(47, 107, 255, 0.7);
     }
   }
 }
@@ -208,7 +210,7 @@ $primary: #1890ff;
     width: 4px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #d0d5dd;
+    background: rgba(47, 107, 255, 0.25);
     border-radius: 2px;
   }
 }
@@ -219,7 +221,7 @@ $primary: #1890ff;
 
 .group-label {
   font-size: 12px;
-  color: #909daf;
+  color: #64748b;
   padding: 8px 12px 4px;
   letter-spacing: 1px;
 }
@@ -235,7 +237,7 @@ $primary: #1890ff;
   margin-bottom: 2px;
 
   &:hover {
-    background: #f0f5ff;
+    background: rgba(47, 107, 255, 0.08);
 
     .delete-btn {
       opacity: 1;
@@ -243,7 +245,8 @@ $primary: #1890ff;
   }
 
   &.active {
-    background: rgba($primary, 0.08);
+    background: rgba(47, 107, 255, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(47, 107, 255, 0.2);
 
     .session-title {
       color: $primary;
@@ -263,13 +266,13 @@ $primary: #1890ff;
 
     .session-icon {
       margin-right: 8px;
-      color: #b0b8c4;
+      color: #94a3b8;
       font-size: 14px;
       flex-shrink: 0;
     }
 
     .session-title {
-      color: #4a5568;
+      color: #334155;
       font-size: 13px;
       white-space: nowrap;
       overflow: hidden;
@@ -279,7 +282,7 @@ $primary: #1890ff;
 
   .delete-btn {
     opacity: 0;
-    color: #b0b8c4;
+    color: #94a3b8;
     padding: 4px;
     transition: all 0.2s;
     flex-shrink: 0;
@@ -296,7 +299,7 @@ $primary: #1890ff;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #b0b8c4;
+  color: #94a3b8;
 
   i {
     font-size: 48px;

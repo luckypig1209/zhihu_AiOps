@@ -197,6 +197,19 @@ export default {
         '指标查询': 'el-icon-data-analysis',
         '监控对象查询': 'el-icon-search',
         '告警与巡检': 'el-icon-warning-outline',
+        '告警分析': 'el-icon-warning-outline',
+        '根因定位': 'el-icon-search',
+        '处置建议': 'el-icon-s-tools',
+        '资产扫描': 'el-icon-search',
+        '资产识别': 'el-icon-monitor',
+        '报告输出': 'el-icon-document-checked',
+        '巡检执行': 'el-icon-finished',
+        '基线核查': 'el-icon-s-operation',
+        '巡检分析': 'el-icon-data-analysis',
+        '知识检索': 'el-icon-search',
+        'SOP生成': 'el-icon-document-checked',
+        '智能问答': 'el-icon-chat-line-round',
+        '经验沉淀': 'el-icon-notebook-2',
         '其他': 'el-icon-more'
       }
       return iconMap[category] || 'el-icon-folder'
@@ -218,13 +231,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #eceef5;
+  border-bottom: 1px solid rgba(47, 107, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
 
   h3 {
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a2e;
+    color: #0f172a;
   }
 
   .header-actions {
@@ -233,12 +247,12 @@ export default {
   }
 
   .el-button {
-    color: #8c8c9a;
+    color: #64748b;
     padding: 4px;
     font-size: 16px;
 
     &:hover {
-      color: #1890ff;
+      color: #2f6bff;
     }
   }
 }
@@ -252,7 +266,7 @@ export default {
     width: 4px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
+    background: rgba(47, 107, 255, 0.25);
     border-radius: 2px;
   }
 }
@@ -268,13 +282,13 @@ export default {
   padding: 6px 4px;
   font-size: 12px;
   font-weight: 600;
-  color: #8c8c9a;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
   i {
     font-size: 13px;
-    color: #1890ff;
+    color: #2f6bff;
   }
 }
 
@@ -293,21 +307,21 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
   font-size: 13px;
-  color: #4a4a5a;
+  color: #334155;
 
   &:hover {
-    background: #f0f5ff;
-    color: #1890ff;
+    background: rgba(47, 107, 255, 0.08);
+    color: #2f6bff;
     transform: translateX(2px);
 
     i {
-      color: #1890ff;
+      color: #2f6bff;
     }
   }
 
   i {
     font-size: 14px;
-    color: #b0b0b8;
+    color: #94a3b8;
     flex-shrink: 0;
     transition: color 0.2s;
   }
@@ -325,7 +339,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 40px 0;
-  color: #b0b0b8;
+  color: #94a3b8;
 
   i {
     font-size: 40px;

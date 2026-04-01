@@ -77,7 +77,20 @@ export default {
         'query-metrics': '指标查询',
         'query-zabbix': 'Zabbix查询',
         'full-inspection': '全面巡检',
-        'add-os-monitor': 'OS监控'
+        'add-os-monitor': 'OS监控',
+        'alarm-triage': '告警收敛',
+        'root-cause': '根因定位',
+        'mitigation-plan': '处置方案',
+        'recovery-verify': '恢复验证',
+        'network-scan': '网段扫描',
+        'asset-fingerprint': '资产指纹',
+        'inventory-build': '台账汇总',
+        'inspection-run': '日常巡检',
+        'baseline-check': '基线核查',
+        'inspection-report': '巡检报告',
+        'kb-search': '知识检索',
+        'kb-summary': '经验沉淀',
+        'kb-sop': 'SOP生成'
       }
       return nameMap[skill] || skill
     }
@@ -87,10 +100,45 @@ export default {
 
 <style lang="scss" scoped>
 .digital-staff-page {
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 50%, #16213e 100%);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.18), transparent 45%),
+    radial-gradient(circle at 88% 12%, rgba(47, 107, 255, 0.18), transparent 40%),
+    linear-gradient(180deg, #f7fbff 0%, #eef4ff 55%, #f9fbff 100%);
   padding: 40px;
   overflow-x: hidden;
+  color: #0f172a;
+  font-family: 'Space Grotesk', 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+
+.digital-staff-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.digital-staff-page::after {
+  content: '';
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.18), transparent 60%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.digital-staff-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 // ==================== Banner ====================
@@ -113,7 +161,7 @@ export default {
 
   i {
     font-size: 48px;
-    color: #667eea;
+    color: #2f6bff;
     display: block;
   }
 
@@ -125,7 +173,7 @@ export default {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: rgba(102, 126, 234, 0.2);
+    background: rgba(47, 107, 255, 0.2);
     animation: bannerPulse 2.5s ease-in-out infinite;
   }
 }
@@ -138,14 +186,18 @@ export default {
 .banner-title {
   font-size: 32px;
   font-weight: 700;
-  color: #fff;
+  color: #1d4ed8;
   margin: 0 0 12px;
   letter-spacing: 2px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 60%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .banner-desc {
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #5b6475;
   margin: 0;
 }
 
@@ -161,7 +213,7 @@ export default {
     position: absolute;
     width: 4px;
     height: 4px;
-    background: rgba(102, 126, 234, 0.4);
+    background: rgba(14, 165, 233, 0.35);
     border-radius: 50%;
     animation: float 6s ease-in-out infinite;
   }
@@ -200,38 +252,60 @@ export default {
 
 .module-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(47, 107, 255, 0.12);
   border-radius: 16px;
   padding: 32px 24px 24px;
   cursor: pointer;
   transition: all 0.3s ease;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), transparent 65%);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
 
   &:hover:not(.disabled) {
-    transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(-6px) scale(1.01);
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(47, 107, 255, 0.28);
+    box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   &.disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.55;
 
     .card-title, .card-desc {
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(15, 23, 42, 0.4);
     }
   }
+}
+
+.module-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .coming-soon-badge {
   position: absolute;
   top: 16px;
   right: -28px;
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.6);
+  background: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.6);
   font-size: 11px;
   padding: 4px 32px;
   transform: rotate(45deg);
@@ -247,6 +321,7 @@ export default {
   justify-content: center;
   margin-bottom: 20px;
   transition: all 0.3s;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
 
   i {
     font-size: 28px;
@@ -257,13 +332,13 @@ export default {
 .card-title {
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: #0f172a;
   margin: 0 0 8px;
 }
 
 .card-desc {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
+  color: #5b6475;
   margin: 0 0 16px;
   line-height: 1.6;
   min-height: 42px;
@@ -281,7 +356,7 @@ export default {
   padding: 2px 10px;
   border-radius: 10px;
   border: 1px solid;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.5px;
 }
 
@@ -293,6 +368,7 @@ export default {
   .enter-text {
     font-size: 13px;
     font-weight: 500;
+    letter-spacing: 0.2px;
   }
 
   i {
@@ -310,8 +386,8 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  opacity: 0.6;
+  height: 4px;
+  opacity: 0.75;
   transition: opacity 0.3s;
 
   .module-card:hover:not(.disabled) & {

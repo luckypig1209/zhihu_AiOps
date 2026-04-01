@@ -256,10 +256,16 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(34, 211, 238, 0.16), transparent 45%),
+    radial-gradient(circle at 90% 8%, rgba(47, 107, 255, 0.16), transparent 40%),
+    linear-gradient(180deg, #f7fbff 0%, #eef4ff 60%, #f9fbff 100%);
   overflow: hidden;
   animation: fadeIn 0.4s ease-out;
-  border-radius: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(47, 107, 255, 0.12);
+  font-family: 'Space Grotesk', 'Noto Sans SC', 'PingFang SC', sans-serif;
+  color: #0f172a;
 }
 
 // ==================== 入场动画 ====================
@@ -295,13 +301,17 @@ export default {
   flex: 1;
   display: flex;
   overflow: hidden;
+  gap: 12px;
+  padding: 12px;
 }
 
 // ==================== 左栏 ====================
 .left-panel {
   width: 240px;
-  background: #fafbfc;
-  border-right: 1px solid #e8ecf1;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(47, 107, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
   flex-shrink: 0;
 }
 
@@ -309,13 +319,17 @@ export default {
 .center-panel {
   flex: 1;
   min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 // ==================== 右栏 ====================
 .right-panel {
   width: 260px;
-  background: #fafbfc;
-  border-left: 1px solid #e8ecf1;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(47, 107, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
   flex-shrink: 0;
 }
 
