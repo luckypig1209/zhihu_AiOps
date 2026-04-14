@@ -1,0 +1,41 @@
+  version: '3.8'
+                                                                                           
+  services:       
+    ai-bridge:                                                                             
+      build:      
+        context: ./zh-web-code/websocket-bridge                                            
+        dockerfile: Dockerfile
+      container_name: zhihu-ai-bridge                                                      
+      restart: unless-stopped                                                              
+      ports:                                                                               
+        - "0.0.0.0:9999:9999"                                                            
+      environment:                                                                         
+        # WebSocket 配置                                                                   
+        - WS_PORT=9999                                                                     
+                                                                                           
+        # 数据源配置（这些是必须的）                                                       
+        - VM_URL=${VM_URL:-http://117.89.88.210:29090}                                     
+        - ZABBIX_URL=${ZABBIX_URL:-http://117.89.88.210:28080}                             
+        - ZABBIX_USER=${ZABBIX_USER:-Admin}                                                
+        - ZABBIX_PASSWORD=${ZABBIX_PASSWORD}                                               
+        - ZHIHU_API_URL=${ZHIHU_API_URL:-http://117.89.88.210:58080/admin-api}             
+                                                                                           
+        # 智护平台认证（代码中使用的是硬编码默认值，但建议从环境变量传入）                 
+        - ZHIHU_USER=${ZHIHU_USER:-admin}                                                  
+        - ZHIHU_PASSWORD=${ZHIHU_PASSWORD:-Heimdall!0325}                                  
+                                                                                           
+      volumes:                                                                             
+        - ./logs/ai-bridge:/app/logs                                                       
+        - ./zhihu-api-1.0.0/references:/app/skills:ro                                      
+      healthcheck:                                                                         
+        test: ["CMD", "node", "-e", "require('ws').createConnection('ws://localhost:9999').
+  on('error',()=>process.exit(1)).on('open',()=>process.exit(0))"]                         
+        interval: 30s
+        timeout: 10s                                                                       
+        retries: 3                                                                         
+        start_period: 10s
+      logging:                                                                             
+        driver: "json-file"                                                                
+        options:                                                                           
+          max-size: "10m"                                                                  
+          max-file: "3"                
