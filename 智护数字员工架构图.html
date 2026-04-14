@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智护运维平台 - AI 助手架构图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+
+  /* ======= Architecture Diagram ======= */
+  .arch-container {
+    max-width: 1100px;
+    margin: 0 auto 60px;
+    position: relative;
+  }
+
+  .arch-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .arch-box {
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 200px;
+    text-align: center;
+    position: relative;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .arch-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .arch-box .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: .7;
+    margin-bottom: 6px;
+  }
+  .arch-box .name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .arch-box .desc {
+    font-size: 12px;
+    margin-top: 6px;
+    opacity: .75;
+    line-height: 1.5;
+  }
+
+  /* color themes */
+  .box-user {
+    background: linear-gradient(135deg, #1e3a5f, #1e293b);
+    border: 1px solid #3b82f6;
+    box-shadow: 0 0 20px rgba(59,130,246,.15);
+  }
+  .box-frontend {
+    background: linear-gradient(135deg, #1a3347, #1e293b);
+    border: 1px solid #06b6d4;
+    box-shadow: 0 0 20px rgba(6,182,212,.15);
+  }
+  .box-nginx {
+    background: linear-gradient(135deg, #2d2244, #1e293b);
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 0 20px rgba(139,92,246,.15);
+  }
+  .box-bridge {
+    background: linear-gradient(135deg, #1a3329, #1e293b);
+    border: 1px solid #22c55e;
+    box-shadow: 0 0 20px rgba(34,197,94,.15);
+  }
+  .box-connector {
+    background: linear-gradient(135deg, #3b2f1a, #1e293b);
+    border: 1px solid #f59e0b;
+    box-shadow: 0 0 20px rgba(245,158,11,.15);
+  }
+  .box-llm {
+    background: linear-gradient(135deg, #3b1a2e, #1e293b);
+    border: 1px solid #ec4899;
+    box-shadow: 0 0 20px rgba(236,72,153,.15);
+  }
+  .box-skill {
+    background: linear-gradient(135deg, #1a2a3b, #1e293b);
+    border: 1px solid #64748b;
+    box-shadow: 0 0 20px rgba(100,116,139,.1);
+    min-width: 130px;
+    padding: 14px 16px;
+  }
+  .box-skill .name { font-size: 14px; }
+  .box-datasource {
+    background: linear-gradient(135deg, #1e2d3d, #1e293b);
+    border: 1px solid #0ea5e9;
+    box-shadow: 0 0 20px rgba(14,165,233,.15);
+    min-width: 160px;
+  }
+  .box-platform {
+    background: linear-gradient(135deg, #2a1a1a, #1e293b);
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 20px rgba(239,68,68,.12);
+  }
+
+  /* arrows */
+  .arrow-down {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
+  }
+  .arrow-down svg { width: 24px; height: 32px; }
+  .arrow-down path { stroke: #475569; stroke-width: 2; fill: none; }
+  .arrow-down polygon { fill: #475569; }
+
+  .arrow-label {
+    text-align: center;
+    font-size: 11px;
+    color: #64748b;
+    margin: -2px 0 2px;
+    letter-spacing: .5px;
+  }
+
+  /* ======= Skills Section ======= */
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin: 60px 0 32px;
+    color: #f8fafc;
+  }
+  .section-title span {
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .skills-grid {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .skill-card {
+    background: rgba(30, 41, 59, .8);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color .2s, transform .2s;
+  }
+  .skill-card:hover {
+    border-color: #f59e0b;
+    transform: translateY(-2px);
+  }
+  .skill-card .skill-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .skill-card .skill-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .skill-card .skill-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f8fafc;
+  }
+  .skill-card .skill-file {
+    font-size: 11px;
+    color: #64748b;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  .skill-card .skill-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .skill-card .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .skill-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(100,116,139,.15);
+    border: 1px solid #334155;
+    color: #94a3b8;
+  }
+  .skill-tag.tag-ref { border-color: #3b82f6; color: #60a5fa; background: rgba(59,130,246,.1); }
+  .skill-tag.tag-tool { border-color: #22c55e; color: #4ade80; background: rgba(34,197,94,.1); }
+  .skill-tag.tag-action { border-color: #f59e0b; color: #fbbf24; background: rgba(245,158,11,.1); }
+
+  /* ======= Flow Section ======= */
+  .flow-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px;
+    background: rgba(30, 41, 59, .6);
+    border: 1px solid #334155;
+    border-radius: 16px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .flow-step:last-child { margin-bottom: 0; }
+  .flow-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: #0f172a;
+  }
+  .flow-content h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 4px;
+  }
+  .flow-content p {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .flow-content code {
+    background: rgba(245,158,11,.1);
+    color: #fbbf24;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  .flow-connector {
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    margin: -8px 0;
+  }
+  .flow-connector .line {
+    width: 2px;
+    height: 16px;
+    background: #334155;
+  }
+
+  /* ======= Stats ======= */
+  .stats-row {
+    max-width: 800px;
+    margin: 48px auto 0;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    text-align: center;
+    padding: 20px 32px;
+    background: rgba(30, 41, 59, .6);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    min-width: 150px;
+  }
+  .stat-box .stat-num {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-box .stat-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  .footer {
+    text-align: center;
+    color: #475569;
+    font-size: 12px;
+    margin-top: 60px;
+  }
+</style>
+</head>
+<body>
+
+<h1>智护运维平台 · AI 助手架构</h1>
+<p class="subtitle">ZhiHu AiOps — AI-Powered Infrastructure Monitoring & Management</p>
+
+<!-- =========== Architecture Diagram =========== -->
+<div class="arch-container">
+
+  <!-- Layer 1: User -->
+  <div class="arch-row">
+    <div class="arch-box box-user" style="min-width:280px;">
+      <div class="label">用户层</div>
+      <div class="name">&#x1f9d1;&#x200d;&#x1f4bb; 运维人员</div>
+      <div class="desc">在浏览器中输入自然语言查询</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">自然语言查询</div>
+
+  <!-- Layer 2: Frontend -->
+  <div class="arch-row">
+    <div class="arch-box box-frontend" style="min-width: 500px;">
+      <div class="label">前端层</div>
+      <div class="name">Vue.js 智护运维前端</div>
+      <div class="desc">AI 助手对话界面 · 模型配置 · Skills 编辑器<br>
+        <code style="font-size:11px;color:#06b6d4;">AiChat / ModelConfigDialog / SkillsEditorDialog</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">WebSocket &nbsp;ws://host/ws/</div>
+
+  <!-- Layer 3: Nginx -->
+  <div class="arch-row">
+    <div class="arch-box box-nginx" style="min-width: 400px;">
+      <div class="label">反向代理</div>
+      <div class="name">Nginx (zhihu-proxy)</div>
+      <div class="desc">:58080 · 前端静态资源 + API 代理 + WebSocket 代理</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">/ws/ &#x2192; :9999</div>
+
+  <!-- Layer 4: AI Bridge -->
+  <div class="arch-row">
+    <div class="arch-box box-bridge" style="min-width:340px;">
+      <div class="label">消息中转</div>
+      <div class="name">WebSocket Bridge (server.js)</div>
+      <div class="desc">:9999 · 前端 &#x2194; AI Connector 消息中转<br>注册、心跳、请求路由</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">内部 WebSocket</div>
+
+  <!-- Layer 5: AI Connector + Skills -->
+  <div class="arch-row" style="align-items: stretch;">
+    <div class="arch-box box-connector" style="min-width:340px;">
+      <div class="label">AI 执行引擎</div>
+      <div class="name">AI Connector (ai-connector.js)</div>
+      <div class="desc" style="text-align:left; margin-top:12px;">
+        &#x2022; 加载 Skills (.md) 注入 System Prompt<br>
+        &#x2022; 调用 LLM 进行意图识别<br>
+        &#x2022; 执行 Tool Calls (Function Calling)<br>
+        &#x2022; 流式返回 AI 回复<br>
+        &#x2022; 支持动态配置模型/API
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:8px;">
+      <div class="arch-box box-llm">
+        <div class="label">大模型</div>
+        <div class="name">LLM API</div>
+        <div class="desc">Claude / DeepSeek / GPT<br>OpenAI 兼容格式</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">Skills 文档注入 System Prompt &nbsp;+&nbsp; Tool Calls 执行</div>
+
+  <!-- Layer 6: Skills -->
+  <div class="arch-row" style="gap:12px;">
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">VM 指标</div>
+      <div class="desc">PromQL 参考</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">Zabbix</div>
+      <div class="desc">主机/告警查询</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">资产中心</div>
+      <div class="desc">资产 CRUD</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">监控中心</div>
+      <div class="desc">告警规则</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">CMDB</div>
+      <div class="desc">扫描任务</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#60a5fa;">展示中心</div>
+      <div class="desc">仪表盘数据</div>
+    </div>
+    <div class="arch-box box-skill">
+      <div class="name" style="color:#fbbf24;">新增监控</div>
+      <div class="desc">SSH+创建流程</div>
+    </div>
+  </div>
+
+  <div class="arrow-down"><svg viewBox="0 0 24 32"><line x1="12" y1="2" x2="12" y2="26" stroke="#475569" stroke-width="2"/><polygon points="6,22 12,30 18,22" fill="#475569"/></svg></div>
+  <div class="arrow-label">Tool 执行 &#x2192; 调用数据源 API</div>
+
+  <!-- Layer 7: Data Sources -->
+  <div class="arch-row">
+    <div class="arch-box box-datasource">
+      <div class="label">时序数据</div>
+      <div class="name">VictoriaMetrics</div>
+      <div class="desc">:29090 · PromQL</div>
+    </div>
+    <div class="arch-box box-datasource">
+      <div class="label">网络监控</div>
+      <div class="name">Zabbix 7.0</div>
+      <div class="desc">:28080 · JSON-RPC</div>
+    </div>
+    <div class="arch-box box-platform">
+      <div class="label">业务平台</div>
+      <div class="name">智护运维后端</div>
+      <div class="desc">:58080 · 资产/监控/CMDB</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =========== Skills Detail =========== -->
+<div class="section-title">&#x1f4da; 共 <span>7</span> 个 Skills 文档</div>
+
+<div class="skills-grid">
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(14,165,233,.15);color:#0ea5e9;">&#x1f4ca;</div>
+      <div>
+        <div class="skill-name">VictoriaMetrics 指标查询</div>
+        <div class="skill-file">api_victoriametrics.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">定义了 Categraf/Telegraf 命名规范的指标体系，包含 CPU、内存、磁盘、网络等常用 PromQL 模板，以及标签说明（host_ip、agent_hostname 等）。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">PromQL</span>
+      <span class="skill-tag">cpu_usage_idle</span>
+      <span class="skill-tag">mem_used_percent</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(239,68,68,.15);color:#ef4444;">&#x1f6a8;</div>
+      <div>
+        <div class="skill-name">Zabbix 监控查询</div>
+        <div class="skill-file">api_zabbix.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">Zabbix 7.0.6 JSON-RPC API 参考，包含主机管理（host.get）、告警查询（problem.get）、监控项（item.get）、触发器等接口的参数说明。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">JSON-RPC</span>
+      <span class="skill-tag">host.get</span>
+      <span class="skill-tag">problem.get</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(34,197,94,.15);color:#22c55e;">&#x1f4e6;</div>
+      <div>
+        <div class="skill-name">资产中心</div>
+        <div class="skill-file">api_asset.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">资产类型、资产模型、资产实例的增删改查接口。包含两步查询流程（先获取 modelId，再按 modelId 查资产）。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">asset-type</span>
+      <span class="skill-tag">asset-model</span>
+      <span class="skill-tag">asset-info</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(245,158,11,.15);color:#f59e0b;">&#x1f514;</div>
+      <div>
+        <div class="skill-name">监控中心</div>
+        <div class="skill-file">api_monitor.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">告警规则管理接口，包含规则列表查询、状态启用/禁用、告警概览等。支持对已有告警规则的管理操作。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">alarm-rules</span>
+      <span class="skill-tag">告警概览</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(139,92,246,.15);color:#8b5cf6;">&#x1f50d;</div>
+      <div>
+        <div class="skill-name">CMDB 扫描</div>
+        <div class="skill-file">api_cmdb.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">CMDB 资产自动发现接口，包含扫描任务的创建、查询、执行，支持按 IP 段进行网络扫描和资产发现。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">scan-task</span>
+      <span class="skill-tag">资产发现</span>
+    </div>
+  </div>
+
+  <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(6,182,212,.15);color:#06b6d4;">&#x1f4c8;</div>
+      <div>
+        <div class="skill-name">展示中心</div>
+        <div class="skill-file">api_dashboard.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">仪表盘数据接口，包含告警统计汇总、按等级分组统计、告警趋势等可视化数据查询。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-ref">参考文档</span>
+      <span class="skill-tag">dashboard</span>
+      <span class="skill-tag">告警统计</span>
+    </div>
+  </div>
+
+  <div class="skill-card" style="border-color:#f59e0b;">
+    <div class="skill-header">
+      <div class="skill-icon" style="background:rgba(245,158,11,.2);color:#f59e0b;">&#x2795;</div>
+      <div>
+        <div class="skill-name">新增操作系统监控</div>
+        <div class="skill-file">add-os-monitor.md</div>
+      </div>
+    </div>
+    <div class="skill-desc">完整的操作系统监控创建流程：登录获取 Token → 获取模型字段 → SSH 连通性测试 → 创建资产。支持单台和批量新增。</div>
+    <div class="skill-tags">
+      <span class="skill-tag tag-action">操作执行</span>
+      <span class="skill-tag tag-tool">Tool 绑定</span>
+      <span class="skill-tag">add_os_monitor</span>
+      <span class="skill-tag">batch_add</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- =========== Flow =========== -->
+<div class="section-title">&#x1f504; Skills 工作流程</div>
+
+<div class="flow-container">
+  <div class="flow-step">
+    <div class="flow-num">1</div>
+    <div class="flow-content">
+      <h3>Skills 加载</h3>
+      <p>AI Connector 启动时扫描 <code>/app/skills/*.md</code>，将所有 .md 文件加载到内存。通过 Docker Volume 从宿主机 <code>references/</code> 目录挂载。</p>
+    </div>
+  </div>
+  <div class="flow-connector"><div class="line"></div></div>
+  <div class="flow-step">
+    <div class="flow-num">2</div>
+    <div class="flow-content">
+      <h3>注入 System Prompt</h3>
+      <p><code>buildSkillsDocs()</code> 将所有 skill 内容拼接到 System Prompt 的「Skills 参考文档」章节，每个截取前 2000 字符。模型在回答时可以参考这些文档。</p>
+    </div>
+  </div>
+  <div class="flow-connector"><div class="line"></div></div>
+  <div class="flow-step">
+    <div class="flow-num">3</div>
+    <div class="flow-content">
+      <h3>LLM 意图识别 + Tool 选择</h3>
+      <p>模型根据用户查询 + Skills 文档上下文，决定调用哪个 Tool（Function Calling）。例如看到 <code>api_victoriametrics.md</code> 中的指标名，就会用 <code>cpu_usage_idle</code> 而非 <code>node_cpu_seconds_total</code>。</p>
+    </div>
+  </div>
+  <div class="flow-connector"><div class="line"></div></div>
+  <div class="flow-step">
+    <div class="flow-num">4</div>
+    <div class="flow-content">
+      <h3>Tool 执行</h3>
+      <p>AI Connector 根据模型返回的 tool_calls，在 <code>executeToolCall()</code> 中分发到对应的 JS 函数执行。当前支持 5 个 Tool：<code>query_victoriametrics</code> · <code>query_zabbix</code> · <code>query_zhihu_api</code> · <code>add_os_monitor</code> · <code>batch_add_os_monitor</code></p>
+    </div>
+  </div>
+  <div class="flow-connector"><div class="line"></div></div>
+  <div class="flow-step">
+    <div class="flow-num">5</div>
+    <div class="flow-content">
+      <h3>结果回传 + 流式输出</h3>
+      <p>Tool 执行结果返回给 LLM，模型基于数据生成最终回复，通过 WebSocket 流式推送到前端展示。</p>
+    </div>
+  </div>
+</div>
+
+<!-- =========== Stats =========== -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-num">7</div>
+    <div class="stat-label">Skills 文档</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">5</div>
+    <div class="stat-label">Tool Functions</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">3</div>
+    <div class="stat-label">数据源</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">6</div>
+    <div class="stat-label">参考型 Skills</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">1</div>
+    <div class="stat-label">操作型 Skill</div>
+  </div>
+</div>
+
+<div class="footer">
+  ZhiHu AiOps Architecture · Generated 2026-03-31
+</div>
+
+</body>
+</html>
