@@ -1,7 +1,0 @@
-server:
-  listen: ":10099"
-  forward_path: "/forward"
-  result_path: "/result"
-
-ai:
-  ws_url: "ws://127.0.0.1:9999"
